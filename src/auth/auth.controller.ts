@@ -44,7 +44,7 @@ export const login = async (req: Request, res: Response):Promise<any> => {
       process.env.REFRESH_TOKEN_SECRET as string,
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRY as any }
     );
-    
+
     await TokenModel.create({
       accessToken,
       refreshToken,
@@ -90,4 +90,38 @@ export const logout = async(req:Request,res:Response)=> {
     }
 }
 
+export const refreshToken = async(req:Request,res:Response)=> {
+    try {
+        const authHeader = req.headers['authorization']
+        const refreshToken = authHeader && authHeader?.split(' ')[1]
+        if(!refreshToken) return res.status(401).json({ error: "Unauthorized", data: null });
+        jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET!,async(err,claim)=>{
+            if(err) return res.status(401).json({ error: "Invalid refresh token", data: null });
+            await TokenModel.deleteOne({refreshToken:refreshToken})
+
+            const newAccessToken = jwt.sign(
+                { id: (claim as JwtPayload).id },
+                process.env.ACCESS_TOKEN_SECRET as string,
+                { expiresIn: process.env.ACCESS_TOKEN_EXPIRY as any }
+              );
+          
+              const newRefreshToken = jwt.sign(
+                { id: (claim as JwtPayload).id },
+                process.env.REFRESH_TOKEN_SECRET as string,
+                { expiresIn: process.env.REFRESH_TOKEN_EXPIRY as any}
+              );
+              await TokenModel.create({
+                accessToken:newAccessToken,
+                refreshToken:newRefreshToken,
+                userId: (claim as JwtPayload).id
+              })
+              res.status(200).json({error:null,data:{
+                accessToken:newAccessToken,
+                refreshToken:newRefreshToken,
+              }})
+        })
+    }catch(err){
+        res.status(500).json({ error: "Internal server error", data: null });
+    }
+}
 
