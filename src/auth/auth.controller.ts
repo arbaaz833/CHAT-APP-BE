@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import { Request, Response } from "express";
+import type {JwtPayload, VerifyErrors} from 'jsonwebtoken'
+import { NextFunction, Request, Response } from "express";
 import { UserModel } from "../user/user.model";
 import bcrypt from "bcrypt";
 import { TokenModel } from "./auth.model";
@@ -55,5 +56,22 @@ export const login = async (req: Request, res: Response):Promise<any> => {
       res.status(500).json({ error: "Internal server error", data: null });
   }
 };
+
+export const authenticate = async(req:Request,res:Response,next:NextFunction)=>{
+    try{
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        if(!token) return res.status(401).json({error:"Unauthorized",data:null})
+        const tokenDoc = await TokenModel.findOne({accessToken:token})
+        if(tokenDoc?.accessToken !== token) return res.status(401).json({error:"Unauthorized",data:null})
+        jwt.verify(token,process.env.ACCESS_TOKEN_SECRET!,async (err,claim) => {
+            if(err) return res.status(401).json({error:'Unauthorized',data:null})
+            if(tokenDoc.userId !== (claim as JwtPayload).id) return res.status(401).json({error:'Unauthorized',data:null})
+            next()
+    })
+    }catch(err){
+        res.status(500).json({ error: "Internal server error", data: null });
+    }
+}
 
 
