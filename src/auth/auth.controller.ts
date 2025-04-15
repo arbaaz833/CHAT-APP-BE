@@ -5,10 +5,13 @@ import { UserModel } from "../user/user.model";
 import bcrypt from "bcrypt";
 import { TokenModel } from "./auth.model";
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response):Promise<any> => {
   try {
+    const user = await UserModel.findOne({email:req.body.email})
+    if(user) return res.status(403).json({error:'Email already taken',data:null})
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    delete req.body.confirmPassword
     await UserModel.create({
       ...req.body,
       password: hashedPassword,
@@ -61,7 +64,7 @@ export const login = async (req: Request, res: Response):Promise<any> => {
   }
 };
 
-export const authenticate = async(req:Request,res:Response,next:NextFunction)=>{
+export const authenticate = async(req:Request,res:Response,next:NextFunction):Promise<any>=>{
     try{
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
@@ -78,7 +81,7 @@ export const authenticate = async(req:Request,res:Response,next:NextFunction)=>{
     }
 }
 
-export const logout = async(req:Request,res:Response)=> {
+export const logout = async(req:Request,res:Response): Promise<any>=> {
     try {
         const authHeader = req.headers['authorization']
         const token = authHeader && authHeader?.split(' ')[1]
@@ -90,7 +93,7 @@ export const logout = async(req:Request,res:Response)=> {
     }
 }
 
-export const refreshToken = async(req:Request,res:Response)=> {
+export const refreshToken = async(req:Request,res:Response):Promise<any>=> {
     try {
         const authHeader = req.headers['authorization']
         const refreshToken = authHeader && authHeader?.split(' ')[1]
