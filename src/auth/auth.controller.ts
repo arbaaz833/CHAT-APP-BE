@@ -1,12 +1,12 @@
 import jwt from "jsonwebtoken";
-import type {JwtPayload, VerifyErrors} from 'jsonwebtoken'
+import type {JwtPayload} from 'jsonwebtoken'
 import { NextFunction, Request, Response } from "express";
 import { UserModel } from "../user/user.model";
 import bcrypt from "bcrypt";
 import { TokenModel } from "./auth.model";
 
 export const register = async (req: Request, res: Response):Promise<any> => {
-  try {
+    try {
     const user = await UserModel.findOne({email:req.body.email})
     if(user) return res.status(403).json({error:'Email already taken',data:null})
     const salt = await bcrypt.genSalt();

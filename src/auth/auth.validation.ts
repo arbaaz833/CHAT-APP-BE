@@ -6,7 +6,7 @@ const loginValidation = Joi.object({
 })
 
 const registerValidation = Joi.object({
-    username: Joi.string()
+    userName: Joi.string()
       .min(3)
       .max(30)
       .required()
