@@ -28,19 +28,23 @@ export const login = async (req: Request, res: Response):Promise<any> => {
       return res
         .status(404)
         .json({ error: "No user against this email.", data: null });
+
     const isMatch = await bcrypt.compare(req.body.password, user.password);
     if (!isMatch)
       return res.status(401).json({ error: "Invalid credentials", data: null });
+
     const accessToken = jwt.sign(
       { id: user.id },
       process.env.ACCESS_TOKEN_SECRET as string,
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY as any }
     );
+
     const refreshToken = jwt.sign(
       { id: user.id },
       process.env.REFRESH_TOKEN_SECRET as string,
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRY as any }
     );
+    
     await TokenModel.create({
       accessToken,
       refreshToken,
@@ -69,6 +73,18 @@ export const authenticate = async(req:Request,res:Response,next:NextFunction)=>{
             if(tokenDoc.userId !== (claim as JwtPayload).id) return res.status(401).json({error:'Unauthorized',data:null})
             next()
     })
+    }catch(err){
+        res.status(500).json({ error: "Internal server error", data: null });
+    }
+}
+
+export const logout = async(req:Request,res:Response)=> {
+    try {
+        const authHeader = req.headers['authorization']
+        const token = authHeader && authHeader?.split(' ')[1]
+        if(!token) return res.status(401).json({ error: "Unauthorized", data: null });
+        await TokenModel.deleteOne({accessToken:token})
+        res.status(200).json({error:null,data:'logged out successfully'}) 
     }catch(err){
         res.status(500).json({ error: "Internal server error", data: null });
     }
