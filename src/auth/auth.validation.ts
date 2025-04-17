@@ -30,15 +30,7 @@ const registerValidation = Joi.object({
       .messages({
         'string.empty': 'Password is required',
         'string.min': 'Password must be at least 6 characters',
-      }),
-  
-    confirmPassword: Joi.string()
-      .valid(Joi.ref('password'))
-      .required()
-      .messages({
-        'string.only': 'Passwords do not match',
-        'string.required': 'Confirm Password is required',
-      }),
+      })
   })
 
 export {
