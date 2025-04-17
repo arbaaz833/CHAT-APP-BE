@@ -5,7 +5,7 @@ import cors from 'cors';
 export const app = express();
 
 app.use(express.json());
-app.use(cors({credentials:true,origin:'*'}))
+app.use(cors({credentials:true,origin:['https://jwt-auth-be-production.up.railway.app']}))
  
 app.use('/auth', authRouter);
 
