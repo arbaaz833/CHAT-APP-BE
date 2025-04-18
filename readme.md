@@ -31,3 +31,9 @@ A secure, scalable backend boilerplate built with **Node.js**, **Express**, **JW
 - **Joi**
 - **JWT (jsonwebtoken)**
 - **dotenv**
+
+## 📁 Status
+
+<a href="https://jwt-auth-be-production.up.railway.app/status" target="_blank" rel="noopener noreferrer">Check status</a>
+
+
