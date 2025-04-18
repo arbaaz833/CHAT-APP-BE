@@ -5,7 +5,7 @@ import cors from 'cors';
 export const app = express();
 
 app.use(express.json());
-app.use(cors({credentials:true}))
+app.use(cors({credentials:true,origin:['https://nextjs-jwt-cookie-auth.vercel.app']}))
  
 app.use('/auth', authRouter);
 
