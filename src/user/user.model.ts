@@ -1,4 +1,5 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import { toJsonTransformer } from "../../utilities/utils";
 
 const userSchema = new Schema({
     userName: {
@@ -12,27 +13,31 @@ const userSchema = new Schema({
         lowercase: true,
         trim: true,
     },
+    profilePicture:{
+        type: String,
+        required:true,
+    },
+    lastSeen:{
+        type: Date,
+        default:null,
+    },
     password: {
         type: String,
         required: true,
         private: true,
     },
-    emailVerified:{
-        type: Boolean,
-        default: false,
-    }
-}).set('toJSON', {
-    transform: (doc, ret) => {
-        for(let key in userSchema.paths){
-            if(userSchema.paths[key].options.private){
-                delete ret[key]
-            }
+    unreadCount:[
+        {
+            _id:false,
+            id:{
+                type:Schema.Types.ObjectId,
+                required:true
+            },
+            count:Number
         }
-        ret.id = doc._id
-        delete ret._id
-        delete ret.__v
-        return ret
-    }
+    ]
+}).set('toJSON', {
+    transform: toJsonTransformer
 });
 
 export type User = InferSchemaType<typeof userSchema>

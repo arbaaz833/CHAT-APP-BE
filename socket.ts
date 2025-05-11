@@ -22,7 +22,7 @@ export const initSocket = (server:http.Server) => {
     io.on('connection',(socket)=>{
         const userId = socket.data.userID
         console.log(`user connected with id: ${userId}`)
-        socket.emit('userJoined',{userId})
+        socket.emit('userOnline',{userId})
 
         socket.on('joinRoom',(data)=>{
             const {roomId} = data
@@ -30,6 +30,7 @@ export const initSocket = (server:http.Server) => {
         })
 
         socket.on('disconnect',()=>{
+            socket.emit('userOffline',{userId})
             console.log("User disconnects")
         })
     })   
