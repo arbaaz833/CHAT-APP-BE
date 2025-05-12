@@ -1,4 +1,5 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import mongoosePaginate from 'mongoose-paginate-v2'
 
 const conversationSchema = new Schema({
     type:{
@@ -31,12 +32,14 @@ const conversationSchema = new Schema({
         type:Schema.Types.ObjectId,
         required:true
       },
-      updatedBy:{
-        type:Schema.Types.ObjectId,
+      lastUpdatedAt:{
+        type:Date,
         required:true
       }
 },{timestamps:true})
  
 export type Conversation =  InferSchemaType<typeof conversationSchema>
+
+conversationSchema.plugin(mongoosePaginate)
 
 export const conversationModel = model('conversations',conversationSchema)

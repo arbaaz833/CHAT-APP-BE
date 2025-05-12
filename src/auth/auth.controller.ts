@@ -70,12 +70,17 @@ export const authenticate = async(req:Request,res:Response,next:NextFunction):Pr
         const token = authHeader && authHeader.split(' ')[1];
         if(!token) return res.status(401).json({error:"Unauthorized",data:null})
         const tokenDoc = await TokenModel.findOne({accessToken:token})
+
         if(tokenDoc?.accessToken !== token) return res.status(401).json({error:"Unauthorized",data:null})
-        jwt.verify(token,process.env.ACCESS_TOKEN_SECRET!,async (err,claim) => {
+
+        jwt.verify(token,process.env.ACCESS_TOKEN_SECRET!,async (err,claim:any) => {
+            if(err?.name === 'TokenExpiredError') return res.status(401).json({error:'token expired',data:null})
             if(err) return res.status(401).json({error:'Unauthorized',data:null})
-            if(tokenDoc.userId !== (claim as JwtPayload).id) return res.status(401).json({error:'Unauthorized',data:null})
+            if(tokenDoc.userId !== claim.id) return res.status(401).json({error:'Unauthorized',data:null})
+            res.locals.user = claim.id
             next()
     })
+
     }catch(err){
         res.status(500).json({ error: "Internal server error", data: null });
     }

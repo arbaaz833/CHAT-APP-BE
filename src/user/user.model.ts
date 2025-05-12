@@ -15,7 +15,6 @@ const userSchema = new Schema({
     },
     profilePicture:{
         type: String,
-        required:true,
     },
     lastSeen:{
         type: Date,
@@ -26,17 +25,21 @@ const userSchema = new Schema({
         required: true,
         private: true,
     },
-    unreadCount:[
-        {
-            _id:false,
-            id:{
-                type:Schema.Types.ObjectId,
-                required:true
-            },
-            count:Number
-        }
-    ]
-}).set('toJSON', {
+    unreadCount:{
+         type:[
+            {
+                _id:false,
+                id:{
+                    type:Schema.Types.ObjectId,
+                    required:true
+                },
+                count:Number
+            }
+        ],
+        default:[],
+        private:true 
+    }
+    }).set('toJSON', {
     transform: toJsonTransformer
 });
 
