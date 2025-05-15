@@ -1,5 +1,4 @@
-import { S3_BUCKET } from "../configs/s3Bucket";
-import { AWS_BUCKET_NAME, SIGNED_URL_LIFE } from "../constants";
+
 
 export function getS3ObjectKeyFromUrl(url:string) {
       const parsedUrl = new URL(url);
@@ -17,7 +16,7 @@ export function getS3ObjectKeyFromUrl(url:string) {
       }
 }
 
-export async function getSignedUrl(url:string) {
-    const key = getS3ObjectKeyFromUrl(url)
-    return S3_BUCKET.getSignedUrl('getObject',{Bucket:AWS_BUCKET_NAME,key:key,expires:SIGNED_URL_LIFE})
-}
+// export async function getSignedUrl(url:string) {
+//     const key = getS3ObjectKeyFromUrl(url)
+//     return S3_BUCKET.getSignedUrl('getObject',{Bucket:AWS_BUCKET_NAME,Key:key,Expires:SIGNED_URL_LIFE})
+// }

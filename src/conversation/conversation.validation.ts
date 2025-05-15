@@ -26,6 +26,7 @@ const create =  Joi.object({
     updatedBy: Joi.string().required(),
 })
 
+
 export const conversationValidation = {
     create
 }

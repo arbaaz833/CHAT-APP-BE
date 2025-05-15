@@ -1,24 +1,28 @@
-import { S3 } from "aws-sdk"
-import { S3_BUCKET } from "../configs/s3Bucket"
+import { s3 } from "../configs/s3Bucket"
 import { AWS_BUCKET_NAME } from "../constants"
-import { getS3ObjectKeyFromUrl, getSignedUrl } from "./storage.helpers"
+import { getS3ObjectKeyFromUrl } from "./storage.helpers"
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3"
 
-const save = async(file:File,key:string) =>{
-    const params:S3.PutObjectRequest = {
-        Bucket:AWS_BUCKET_NAME,
-        Key:key,
-        Body:file,
-        ContentType:file.type
-    }
-    const res = await S3_BUCKET.upload(params).promise()
-    return getSignedUrl(res.Location)
+const save = async(file:Express.Multer.File,key:string) =>{
+    console.log('key: ', key);
+
+    const command = new PutObjectCommand({
+        Bucket: AWS_BUCKET_NAME,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+    
+         await s3.send(command);
+        const objectUrl = `https://${AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+        console.log('Object URL:', objectUrl);
+        return objectUrl; 
 }
 
 const deleteObject = async(url:string) =>{
     const key = getS3ObjectKeyFromUrl(url)
-    const params = {Bucket:AWS_BUCKET_NAME,Key:key}
-
-    await S3_BUCKET.deleteObject(params).promise()
+    const command = {Bucket:AWS_BUCKET_NAME,Key:key}
+    await s3.send(new DeleteObjectCommand(command))
 }
 
 export const storageService = {

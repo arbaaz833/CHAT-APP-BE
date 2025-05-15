@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { conversationModel } from "./conversation.model";
-import { findOrPaginate, toResponse } from "../../utilities/utils";
+import { toResponse } from "../../utilities/utils";
 import { fetchList } from "./conversation.service";
 
 async function create(req:Request,res:Response) {

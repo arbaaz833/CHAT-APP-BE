@@ -4,6 +4,8 @@ import { NextFunction, Request, Response } from "express";
 import { UserModel } from "../user/user.model";
 import bcrypt from "bcrypt";
 import { TokenModel } from "./auth.model";
+import { storageService } from "../../storage/storage.service";
+import mongoose from "mongoose";
 
 export const register = async (req: Request, res: Response):Promise<any> => {
     try {
@@ -11,15 +13,23 @@ export const register = async (req: Request, res: Response):Promise<any> => {
     if(user) return res.status(403).json({error:'Email already taken',data:null})
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    delete req.body.confirmPassword
-    await UserModel.create({
+    const id = new mongoose.Types.ObjectId()
+    let url = ''
+    if(req.file) {
+      url = await storageService.save(req.file,`${id}/${req.file.originalname}`)
+    }
+    const userDoc = new UserModel({
+      _id:id,
       ...req.body,
+      profilePicture:url,
       password: hashedPassword,
     });
+    await userDoc.save()
     res
       .status(201)
       .json({ error: null, data: { message: "User created successfully" } });
   } catch (err) {
+    console.log('err: ', err);
     res.status(500).json({ error: "Internal server error", data: null });
   }
 };
