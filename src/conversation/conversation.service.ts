@@ -3,7 +3,7 @@ import { GenericObject, WithPagination } from "../../utilities/types";
 import { findOrPaginate } from "../../utilities/utils";
 import { conversationModel } from "./conversation.model";
 
-export const fetchList = async ({
+ const fetchList = async ({
   page,
   limit,
   ...filters
@@ -13,7 +13,11 @@ export const fetchList = async ({
     filters,
     { page, limit },
     { lastUpdatedAt: -1 },
-    { path: "admins", select: "userName profilePicture" }
+    { path: "members", select: "userName profilePicture" }
   );
   return docs;
 };
+
+export const conversationService ={
+    fetchList
+}

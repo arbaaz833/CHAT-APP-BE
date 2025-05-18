@@ -3,6 +3,7 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 
 const conversationSchema = new Schema({
     type:{
+        type:String,
         enum:['chat','group'],
         required:true,
     },
@@ -24,7 +25,6 @@ const conversationSchema = new Schema({
       admins:{
         type:[{
             type: Schema.Types.ObjectId,
-            ref:'User'
         }],
         required:true,
       },

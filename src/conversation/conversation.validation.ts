@@ -10,11 +10,6 @@ const create =  Joi.object({
         then:Joi.string().required(),
         otherwise:Joi.forbidden()
     }),
-    groupAvatar: Joi.alternatives().conditional("type",{
-        is:'group',
-        then:Joi.string(),
-        otherwise:Joi.forbidden()
-    }),
     admins: Joi.alternatives().conditional("type",{
         is:'group',
         then:Joi.array().items(
@@ -26,7 +21,13 @@ const create =  Joi.object({
     updatedBy: Joi.string().required(),
 })
 
+const update = Joi.object({
+    groupName:Joi.string(),
+})
+
 
 export const conversationValidation = {
-    create
+    create,
+    update
 }
+

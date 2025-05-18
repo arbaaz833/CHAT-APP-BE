@@ -1,4 +1,5 @@
 import { InferSchemaType, model, Schema } from "mongoose";
+import mongoosePaginate from 'mongoose-paginate-v2'
 
 const messageSchema = new Schema({
     text:{
@@ -18,4 +19,5 @@ const messageSchema = new Schema({
 },{timestamps:true})
 
 export type Message = InferSchemaType<typeof messageSchema>
+messageSchema.plugin(mongoosePaginate)
 export const messageModel = model('messages',messageSchema)
