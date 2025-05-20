@@ -25,6 +25,12 @@ const userSchema = new Schema({
         required: true,
         private: true,
     },
+    conversations:{
+        type:[
+            {type:Schema.Types.ObjectId}
+        ],
+        default:[]
+    },
     unreadCount:{
          type:[
             {

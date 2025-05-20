@@ -4,7 +4,8 @@ import { toResponse } from "../../utilities/utils";
 import { conversationService} from "./conversation.service";
 import { storageService } from "../../storage/storage.service";
 import mongoose from "mongoose";
-import { messageModel } from "../messages/messages.model";
+import { MessageModel } from "../messages/messages.model";
+import { UserModel } from "../user/user.model";
 
 async function create(req:Request<{},{},Conversation>,res:Response):Promise<any> {
     try{
@@ -13,6 +14,7 @@ async function create(req:Request<{},{},Conversation>,res:Response):Promise<any>
         data.members.push(reqUser)
         data.admins.push(reqUser)
         const id = new mongoose.Types.ObjectId()
+        await Promise.all(data.members.map((memberId)=>UserModel.findByIdAndUpdate({_id:memberId},{$push:{conversations:id}})))
         if(data.type === 'group'){
             if(req.file){
                const url =await storageService.save(req.file,`${id}/${req.file.originalname}`)
@@ -45,7 +47,8 @@ async function remove(req:Request,res:Response):Promise<any> {
         if(!convId) return res.status(400).json(toResponse({error:'Please provide conversation Id'}))
         const conv = await conversationModel.findById(convId)
         if(!conv) return res.status(404).json(toResponse({error:'no conversation found'}))
-        await messageModel.deleteMany({conversation:convId})
+        await MessageModel.deleteMany({conversation:convId})
+        await Promise.all(conv.members.map((memberId)=>UserModel.findByIdAndUpdate({_id:memberId},{$pull:{conversations:convId}})))
         await storageService.deleteS3Folder(convId)
         res.status(200).json(toResponse({data:'conversation deleted successfully'}))
     }catch(e){
@@ -75,9 +78,42 @@ async function update(req:Request,res:Response):Promise<any> {
 }
 
 
+async function addAdmins(req:Request,res:Response):Promise<any> {
+    try{
+        const convId = req.params.id
+        const data = req.body
+        if(!convId) return res.status(400).json(toResponse({error:'Please provide conversation Id'}))
+        const conv = await conversationModel.findById(convId)
+        if(!conv) return res.status(404).json(toResponse({error:'no conversation found'}))
+        if(conv.type !=='group') return res.status(400).json(toResponse({error:'Cannot update chat'}))
+        const _res = await conversationModel.findByIdAndUpdate({_id:convId},{$push:{admins:{$each:[...data.admins]}}},{new:true})
+        res.status(200).json(toResponse({data:_res}))
+    }catch(e){
+        res.status(500).json(toResponse({error:'Internal server Error'}))
+    }
+}
+
+async function leave(req:Request,res:Response):Promise<any> {
+    try{
+        const convId = req.params.id
+        const reqUser = res.locals.id
+        if(!convId) return res.status(400).json(toResponse({error:'Please provide conversation Id'}))
+        const conv = await conversationModel.findById(convId)
+        if(!conv) return res.status(404).json(toResponse({error:'no conversation found'}))
+        const _res = await conversationModel.findByIdAndUpdate({_id:convId},{$pull:{members:reqUser},$push:{pastMembers:reqUser}},{new:true})
+        res.status(200).json(toResponse({data:_res}))
+    }catch(e){
+        res.status(500).json(toResponse({error:'Internal server Error'}))
+    }
+}
+
+
+
 export const conversationController = {
     create,
     list,
     remove,
-    update
+    update,
+    addAdmins,
+    leave
 }

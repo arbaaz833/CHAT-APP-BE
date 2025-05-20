@@ -5,8 +5,8 @@ const messageSchema = new Schema({
     text:{
         type:String,
     },
-    mediaUrl:{
-        type:String,
+    media:{
+        type:[String],
     },
     conversation:{
         type:Schema.Types.ObjectId,
@@ -20,4 +20,4 @@ const messageSchema = new Schema({
 
 export type Message = InferSchemaType<typeof messageSchema>
 messageSchema.plugin(mongoosePaginate)
-export const messageModel = model('messages',messageSchema)
+export const MessageModel = model('messages',messageSchema)

@@ -32,6 +32,13 @@ const conversationSchema = new Schema({
         type:Schema.Types.ObjectId,
         required:true
       },
+      pastMembers:{
+        type:[{
+            type: Schema.Types.ObjectId,
+            ref:'User'
+        }],
+        default:[]
+    },
       lastUpdatedAt:{
         type:Date,
         required:true

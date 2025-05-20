@@ -1,6 +1,8 @@
 import {Server} from 'socket.io';
 import {Socket} from 'socket.io'
 import http from 'http'
+import { Actions } from './utilities/types';
+import { userServices } from './src/user/user.service';
 
 let io: Server;
 
@@ -19,18 +21,20 @@ export const initSocket = (server:http.Server) => {
         next()
     })
 
-    io.on('connection',(socket)=>{
+    io.on('connection',async(socket)=> {
         const userId = socket.data.userID
         console.log(`user connected with id: ${userId}`)
-        socket.emit('userOnline',{userId})
-
-        socket.on('joinRoom',(data)=>{
+        
+        const userRooms = await userServices.getUserRooms(userId)
+        if(userRooms?.length) socket.to(userRooms).emit(Actions.USER_ONLINE,{userId})
+            
+        socket.on(Actions.JOIN_ROOM,(data)=> {
             const {roomId} = data
             socket.join(roomId)
         })
 
         socket.on('disconnect',()=>{
-            socket.emit('userOffline',{userId})
+            socket.emit(Actions.USER_OFFLINE,{userId})
             console.log("User disconnects")
         })
     })   

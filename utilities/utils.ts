@@ -4,9 +4,9 @@ import { omit } from "lodash";
 import type { FilterQuery, Model } from "mongoose";
 import { PaginationParams } from "./types";
 
-export const validateSchema = (schema: Joi.Schema) => {
+export const validateSchema = (schema: Joi.Schema,removeExtraProps:boolean=false) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const { error } = schema.validate(req.body);
+    const { error } = schema.validate(req.body,{stripUnknown:removeExtraProps});
     console.log("error: ", error);
     if (error) res.status(400).json({ error: error.message, data: null });
     else next();
