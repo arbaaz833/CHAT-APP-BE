@@ -22,12 +22,12 @@ export const initSocket = (server:http.Server) => {
     })
 
     io.on('connection',async(socket)=> {
-        const userId = socket.data.userID
+        const userId = socket.data.userId
         console.log(`user connected with id: ${userId}`)
         
         const userRooms = await userServices.getUserRooms(userId)
         if(userRooms?.length) socket.to(userRooms).emit(Actions.USER_ONLINE,{userId})
-            
+
         socket.on(Actions.JOIN_ROOM,(data)=> {
             const {roomId} = data
             socket.join(roomId)

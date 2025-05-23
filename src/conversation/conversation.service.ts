@@ -1,7 +1,8 @@
-import { filter } from "lodash";
 import { GenericObject, WithPagination } from "../../utilities/types";
 import { findOrPaginate } from "../../utilities/utils";
 import { conversationModel } from "./conversation.model";
+import { UserModel } from "../user/user.model";
+import mongoose from "mongoose";
 
  const fetchList = async ({
   page,
@@ -17,6 +18,8 @@ import { conversationModel } from "./conversation.model";
   );
   return docs;
 };
+
+
 
 export const conversationService ={
     fetchList

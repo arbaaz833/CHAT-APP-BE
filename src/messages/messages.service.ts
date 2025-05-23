@@ -7,7 +7,9 @@ const fetchList = async ({page=0,limit=0,...filters}:WithPagination<GenericObjec
     return docs
 }
 
+
+
 export const messageService = {
-    fetchList
+    fetchList,
 }
 

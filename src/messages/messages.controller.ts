@@ -7,6 +7,7 @@ import { MessageModel } from "./messages.model";
 import mongoose from "mongoose";
 import { getSocketServer } from "../../socket";
 import { Actions } from "../../utilities/types";
+import { conversationService } from "../conversation/conversation.service";
 
 const list = async(req:Request,res:Response):Promise<any> => {
     try{
@@ -26,7 +27,7 @@ const create = async (req:Request,res:Response): Promise<any> => {
         const roomId = req.params.id
         const senderId = res.locals.id
         const io = getSocketServer();
-        const conv = await conversationModel.findById(roomId)
+        const conv = await conversationModel.findById(roomId).lean()
         if(!conv) return res.status(404).json(toResponse({error:'Invalid ID'}))
         
         const data = req.body
@@ -40,13 +41,16 @@ const create = async (req:Request,res:Response): Promise<any> => {
         const msg =  await MessageModel.create(data)
         io.to(roomId).emit(Actions.NEW_MESSAGE,msg)
         //get connected members to a socket
-        // const socketIdsRoom = io.sockets.adapter.rooms.get(roomId)
-        // const membersConnected = Array.from(socketIdsRoom?.values()!).map((id)=>io.sockets.sockets.get(id))
+        //io.sockets.adapter.rooms is a MAP 
+        const socketIdsRoom = io.sockets.adapter.rooms.get(roomId)
+        const membersConnected = Array.from(socketIdsRoom?.values()!).map((id)=>io.sockets.sockets.get(id)).filter(socketObj=>!!socketObj).map(socketObj=>socketObj.data.userId)
+        const membersDisconnected = conv.members.filter(convMember=>!membersConnected.includes(convMember))
+        await conversationService.incrementUnreadCount(membersDisconnected,roomId)
         let timeToLastUpdate = (Date.now() - conv.lastUpdatedAt.getTime())/1000
         // 4 seconds cooldown period
         if(timeToLastUpdate > 4){
             session.startTransaction()
-            await conv.updateOne({lastUpdatedAt:new Date()},{session})
+            await conversationModel.findByIdAndUpdate(roomId,{lastUpdatedAt:new Date()},{session})
             await session.commitTransaction()
         } 
         return res.status(200).json(toResponse({data:msg}))
