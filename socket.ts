@@ -33,6 +33,11 @@ export const initSocket = (server:http.Server) => {
             socket.join(roomId)
         })
 
+        socket.on(Actions.LEAVE_ROOM,(data)=>{
+            const {roomId} = data
+            socket.leave(roomId)
+        })
+
         socket.on('disconnect',()=>{
             socket.emit(Actions.USER_OFFLINE,{userId})
             console.log("User disconnects")

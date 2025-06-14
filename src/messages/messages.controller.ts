@@ -7,7 +7,7 @@ import { MessageModel } from "./messages.model";
 import mongoose from "mongoose";
 import { getSocketServer } from "../../socket";
 import { Actions } from "../../utilities/types";
-import { conversationService } from "../conversation/conversation.service";
+import { userServices } from "../user/user.service";
 
 const list = async(req:Request,res:Response):Promise<any> => {
     try{
@@ -42,10 +42,10 @@ const create = async (req:Request,res:Response): Promise<any> => {
         io.to(roomId).emit(Actions.NEW_MESSAGE,msg)
         //get connected members to a socket
         //io.sockets.adapter.rooms is a MAP 
-        const socketIdsRoom = io.sockets.adapter.rooms.get(roomId)
-        const membersConnected = Array.from(socketIdsRoom?.values()!).map((id)=>io.sockets.sockets.get(id)).filter(socketObj=>!!socketObj).map(socketObj=>socketObj.data.userId)
-        const membersDisconnected = conv.members.filter(convMember=>!membersConnected.includes(convMember))
-        await conversationService.incrementUnreadCount(membersDisconnected,roomId)
+        const socketRoomIds = io.sockets.adapter.rooms.get(roomId)
+        const connectedMembers = Array.from(socketRoomIds?.values()!).map((id)=>io.sockets.sockets.get(id)).filter(socketObj=>!!socketObj).map(socketObj=>socketObj.data.userId)
+        const membersDisconnected = conv.members.filter(convMember=>!connectedMembers.includes(convMember))
+        await userServices.incrementUnreadCount(membersDisconnected,roomId)
         let timeToLastUpdate = (Date.now() - conv.lastUpdatedAt.getTime())/1000
         // 4 seconds cooldown period
         if(timeToLastUpdate > 4){

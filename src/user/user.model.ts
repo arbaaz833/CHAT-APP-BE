@@ -16,6 +16,7 @@ const userSchema = new Schema({
     },
     profilePicture:{
         type: String,
+        default: '',
     },
     lastSeen:{
         type: Date,

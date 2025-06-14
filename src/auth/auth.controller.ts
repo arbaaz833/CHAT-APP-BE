@@ -113,7 +113,7 @@ export const refreshToken = async(req:Request,res:Response):Promise<any>=> {
         const authHeader = req.headers['authorization']
         const refreshToken = authHeader && authHeader?.split(' ')[1]
         if(!refreshToken) return res.status(401).json({ error: "Unauthorized", data: null });
-        jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET!,async(err,claim)=>{
+        jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET!,async(err,claim)=> {
             if(err) return res.status(401).json({ error: "Invalid refresh token", data: null });
             await TokenModel.deleteOne({refreshToken:refreshToken})
 

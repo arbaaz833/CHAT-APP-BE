@@ -3,7 +3,9 @@ import { authenticate } from '../auth/auth.controller'
 import { validateSchema } from '../../utilities/utils'
 import { conversationValidation } from './conversation.validation'
 import { conversationController } from './conversation.controller'
-import { upload } from '../../app'
+import multer from 'multer'
+
+const upload = multer({storage: multer.memoryStorage()})
 const conversationRouter = express.Router()
 
 conversationRouter.post('/create',authenticate,validateSchema(conversationValidation.create),upload.single('file'),conversationController.create)
