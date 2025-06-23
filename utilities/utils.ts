@@ -29,6 +29,20 @@ export const toResponse = ({ data, error }: { data?: any; error?: any }) => {
   return { data: data ?? null, error: error ? error : null };
 };
 
+export function generateBase62UniqueString(length: number): string {
+  const BASE62_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const BASE = BASE62_CHARS.length;
+
+  let str = '';
+  for (let i = 0; i < length; i++) {
+    // Generate a random index within the BASE62_CHARS range
+    const randomIndex = Math.floor(Math.random() * BASE);
+    str += BASE62_CHARS[randomIndex];
+  }
+
+  return str;
+}
+
 export const findOrPaginate = <T>(
   model: Model<T>,
   query: FilterQuery<T> = {},

@@ -28,7 +28,7 @@ const deleteS3Folder = async (folderPrefix: string) => {
       // 1. List objects under the prefix
       const listCommand = new ListObjectsV2Command({
         Bucket: AWS_BUCKET_NAME,
-        Prefix: folderPrefix, // e.g., "my-folder/"
+        Prefix: folderPrefix, 
       });
   
       const listedObjects = await s3.send(listCommand);

@@ -2,7 +2,7 @@ import { InferSchemaType, model, Schema } from "mongoose";
 import { toJsonTransformer } from "../../utilities/utils";
 
 const userSchema = new Schema({
-    userName: {
+    username: {
         type: String,
         required: true, 
         unique:true,
@@ -26,6 +26,11 @@ const userSchema = new Schema({
         type: String,
         required: true,
         private: true,
+    },
+    userCode:{
+        type: String,
+        required: true,
+        unique:true,
     },
     conversations:{
         type:[

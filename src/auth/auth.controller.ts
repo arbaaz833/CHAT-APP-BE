@@ -6,11 +6,22 @@ import bcrypt from "bcrypt";
 import { TokenModel } from "./auth.model";
 import { storageService } from "../../storage/storage.service";
 import mongoose from "mongoose";
+import { generateBase62UniqueString } from "../../utilities/utils";
 
 export const register = async (req: Request, res: Response):Promise<any> => {
     try {
     const user = await UserModel.findOne({email:req.body.email})
     if(user) return res.status(403).json({error:'Email already taken',data:null})
+    let userWithCode = true
+    let code 
+    while(userWithCode) {
+      code = generateBase62UniqueString(6);
+      const userWithCodeDoc = await UserModel.findOne({ userCode: code });
+      if (!userWithCodeDoc) {
+        req.body.verificationCode = code;
+        userWithCode = false;
+      }
+    }
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
     const id = new mongoose.Types.ObjectId()
@@ -21,6 +32,7 @@ export const register = async (req: Request, res: Response):Promise<any> => {
     const userDoc = new UserModel({
       _id:id,
       ...req.body,
+      userCode: code,
       profilePicture:url,
       password: hashedPassword,
     });
