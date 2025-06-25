@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import { generateBase62UniqueString } from "../../utilities/utils";
 
 export const register = async (req: Request, res: Response):Promise<any> => {
-    try {
+  try {
     const user = await UserModel.findOne({email:req.body.email})
     if(user) return res.status(403).json({error:'Email already taken',data:null})
     let userWithCode = true
@@ -82,6 +82,7 @@ export const login = async (req: Request, res: Response):Promise<any> => {
         data: { accessToken, refreshToken, user: user.toJSON() },
       });
   } catch (err) {
+    console.log('err: ', err);
       res.status(500).json({ error: "Internal server error", data: null });
   }
 };

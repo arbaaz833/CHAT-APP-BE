@@ -9,33 +9,56 @@ import { UserModel } from "../user/user.model";
 
 async function create(req:Request<{},{},Conversation>,res:Response):Promise<any> {
     try{
-        const reqUser = res.locals.id
+        const reqUser = res.locals.user
         const data = req.body
         data.members.push(reqUser)
-        data.admins.push(reqUser)
         const id = new mongoose.Types.ObjectId()
         await Promise.all(data.members.map((memberId)=>UserModel.findByIdAndUpdate({_id:memberId},{$push:{conversations:id}})))
         if(data.type === 'group'){
+            data.admins.push(reqUser)
             if(req.file){
                const url =await storageService.save(req.file,`${id}/${req.file.originalname}`)
                data.groupAvatar = url
             } 
         }
-        data.createdBy = res.locals.id
-        data.lastUpdatedAt = new Date()
+        data.createdBy = reqUser
+        // data.lastUpdatedAt = new Date()
         const conDoc = new conversationModel({_id:id,...data})
         const doc =  await conDoc.save()
-         res.status(201).json(toResponse({ data: doc.toJSON() }));
+         res.status(201).json(toResponse({ data: doc.populate('members', 'username profilePicture') }));
     }catch(e){
+        console.log('e: ', e);
          res.status(500).json(toResponse({error:'Internal server Error'}))
     }
 }
 
 async function list(req:Request,res:Response) {
     try{
-        const reqUserId = res.locals.id
-        const docs= await conversationService.fetchList({members:[reqUserId],...req.query})
+        const reqUserId = res.locals.user
+        console.log('reqUserId: ', reqUserId);
+        const docs= await conversationService.fetchList({members:{$in:[reqUserId]},...req.query})
          res.status(200).json(toResponse({data:docs}))
+    }catch(e){
+         res.status(500).json(toResponse({error:'Internal server Error'}))
+    }
+}
+
+async function search(req:Request,res:Response):Promise<any> {
+    try{
+        const reqUserId = res.locals.user
+        const searchTerm = req.query.name as string
+        if(!searchTerm) return res.status(400).json(toResponse({error:'Please provide search term'}))
+        const regex = new RegExp(searchTerm, 'i')
+        const users = await UserModel.find({username:regex}).select('_id')
+        const userIds =  users.map((user)=>user._id)
+
+        const docs = await conversationModel.find({
+            $or:[
+                {groupName:regex},
+                {$and:[{members:{$in:[reqUserId]}},{members:{$in:userIds}}]}]},   
+        )
+
+        res.status(200).json(toResponse({data:docs}))
     }catch(e){
          res.status(500).json(toResponse({error:'Internal server Error'}))
     }
@@ -115,5 +138,6 @@ export const conversationController = {
     remove,
     update,
     addAdmins,
-    leave
+    leave,
+    search
 }

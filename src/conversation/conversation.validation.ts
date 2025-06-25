@@ -17,8 +17,7 @@ const create =  Joi.object({
         ),
         otherwise:Joi.forbidden()
     }),
-    createdBy: Joi.string().required(),
-    updatedBy: Joi.string().required(),
+    
 })
 
 const update = Joi.object({

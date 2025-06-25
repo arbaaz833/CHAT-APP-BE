@@ -16,17 +16,14 @@ const conversationSchema = new Schema({
     },
     groupName: {
         type: String,
-        required: true
       },
       groupAvatar: {
         type: String,
-        required:true
       },
       admins:{
         type:[{
             type: Schema.Types.ObjectId,
         }],
-        required:true,
       },
       createdBy:{
         type:Schema.Types.ObjectId,
@@ -37,12 +34,11 @@ const conversationSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref:'User'
         }],
-        default:[]
     },
-      lastUpdatedAt:{
-        type:Date,
-        required:true
-      }
+      // lastUpdatedAt:{
+      //   type:Date,
+      //   required:true
+      // }
 },{timestamps:true})
  
 export type Conversation =  InferSchemaType<typeof conversationSchema>

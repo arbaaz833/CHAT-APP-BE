@@ -8,7 +8,7 @@ const authRouter = express.Router();
 const upload = multer({storage: multer.memoryStorage()})
 
 authRouter.post('/login',validateSchema(loginValidation),login)
-authRouter.post('/signup',validateSchema(registerValidation),upload.single('upload'),register)
+authRouter.post('/signup',validateSchema(registerValidation),upload.single('file'),register)
 authRouter.post('/refresh',refreshToken)
 authRouter.delete('/logout',authenticate,logout)
 

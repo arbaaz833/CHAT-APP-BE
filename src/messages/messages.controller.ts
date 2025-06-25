@@ -46,7 +46,7 @@ const create = async (req:Request,res:Response): Promise<any> => {
         const connectedMembers = Array.from(socketRoomIds?.values()!).map((id)=>io.sockets.sockets.get(id)).filter(socketObj=>!!socketObj).map(socketObj=>socketObj.data.userId)
         const membersDisconnected = conv.members.filter(convMember=>!connectedMembers.includes(convMember))
         await userServices.incrementUnreadCount(membersDisconnected,roomId)
-        let timeToLastUpdate = (Date.now() - conv.lastUpdatedAt.getTime())/1000
+        let timeToLastUpdate = (Date.now() - conv.updatedAt.getTime())/1000
         // 4 seconds cooldown period
         if(timeToLastUpdate > 4){
             session.startTransaction()

@@ -6,7 +6,7 @@ const loginValidation = Joi.object({
 })
 
 const registerValidation = Joi.object({
-    userName: Joi.string()
+    username: Joi.string()
       .min(3)
       .max(30)
       .required()
@@ -31,6 +31,7 @@ const registerValidation = Joi.object({
         'string.empty': 'Password is required',
         'string.min': 'Password must be at least 6 characters',
       }),
+      file:Joi.object()
   })
 
 export {

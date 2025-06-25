@@ -14,7 +14,7 @@ import mongoose from "mongoose";
     filters,
     { page, limit },
     { lastUpdatedAt: -1 },
-    { path: "members", select: "userName profilePicture" }
+    { path: "members", select: "username profilePicture" }
   );
   return docs;
 };
